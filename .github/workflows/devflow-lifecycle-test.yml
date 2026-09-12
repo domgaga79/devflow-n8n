@@ -1,0 +1,10 @@
+name: DevFlow Lifecycle Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  lifecycle-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "DevFlow lifecycle test"
