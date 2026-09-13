@@ -859,33 +859,59 @@ Dashboard
 
 # Screenshots
 
-O dashboard possui páginas específicas para:
+## Overview
 
-### Overview
+Visão consolidada dos Pull Requests, níveis de risco e decisões do Policy Gate.
 
-Visão geral dos Pull Requests, riscos, Policy Gate e análises.
+![DevFlow Overview](docs/screenshots/overview.png)
 
-### Pull Requests
+---
 
-Consulta e filtragem das Pull Requests processadas.
+## Pull Requests
 
-### Pull Request Details
+Listagem com filtros, classificação de risco, score e resultado das políticas.
 
-Detalhes técnicos, arquivos, commits, risco e histórico.
+![DevFlow Pull Requests](docs/screenshots/pull-requests.png)
 
-### Risk Analysis
+---
 
-Distribuição e indicadores relacionados ao risco técnico.
+## Pull Request Intelligence
 
-### Policy Gate
+Detalhes técnicos da análise, incluindo commits, arquivos alterados, breaking changes e histórico.
 
-Decisões automatizadas e regras aplicadas.
+![DevFlow Pull Request Details](docs/screenshots/pr-details.png)
 
-### GitHub Events
+---
 
-Observabilidade dos webhooks e visualização do payload original.
+## Risk Analysis
 
-> Screenshots do projeto podem ser adicionados em `docs/screenshots/`.
+Indicadores agregados de risco e pressão de revisão.
+
+![DevFlow Risk Analysis](docs/screenshots/risk-analysis.png)
+
+---
+
+## Policy Gate
+
+Visualização das decisões automatizadas e das regras de engenharia aplicadas.
+
+![DevFlow Policy Gate](docs/screenshots/policy-gate.png)
+
+---
+
+## GitHub Events
+
+Observabilidade dos eventos recebidos pelo pipeline e acesso ao payload original.
+
+![DevFlow GitHub Events](docs/screenshots/github-events.png)
+
+---
+
+## Responsive Dashboard
+
+Interface adaptada para smartphones, com navegação mobile e componentes responsivos.
+
+![DevFlow Mobile](docs/screenshots/mobile.png)
 
 ---
 
