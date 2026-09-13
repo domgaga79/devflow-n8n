@@ -1,0 +1,16 @@
+<span
+  class="policy-badge"
+  [class.policy-badge--passed]="normalizedStatus() === 'passed'"
+  [class.policy-badge--blocked]="normalizedStatus() === 'blocked'"
+  [class.policy-badge--review]="
+    normalizedStatus() === 'review_required'
+    || normalizedStatus() === 'review-required'
+    || normalizedStatus() === 'review'
+  "
+>
+  <mat-icon>
+    {{ icon() }}
+  </mat-icon>
+
+  {{ normalizedStatus() }}
+</span>

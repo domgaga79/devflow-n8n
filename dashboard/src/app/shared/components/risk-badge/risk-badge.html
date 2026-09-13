@@ -1,0 +1,10 @@
+<span
+  class="risk-badge"
+  [class.risk-badge--low]="normalizedLevel() === 'low'"
+  [class.risk-badge--medium]="normalizedLevel() === 'medium'"
+  [class.risk-badge--high]="normalizedLevel() === 'high'"
+>
+  <span class="risk-badge__dot"></span>
+
+  {{ normalizedLevel() }}
+</span>

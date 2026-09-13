@@ -1,0 +1,50 @@
+.policy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  width: fit-content;
+
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  color: #cbd5e1;
+
+  background:
+    rgba(148, 163, 184, 0.1);
+
+  font-size: 0.68rem;
+  font-weight: 800;
+
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  mat-icon {
+    width: 15px;
+    height: 15px;
+
+    font-size: 15px;
+  }
+}
+
+.policy-badge--passed {
+  color: #86efac;
+
+  background:
+    rgba(74, 222, 128, 0.1);
+}
+
+.policy-badge--review {
+  color: #fde68a;
+
+  background:
+    rgba(251, 191, 36, 0.1);
+}
+
+.policy-badge--blocked {
+  color: #fda4af;
+
+  background:
+    rgba(251, 113, 133, 0.1);
+}

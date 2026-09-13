@@ -1,0 +1,521 @@
+<section class="policy-gate">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">
+        Automated Governance
+      </span>
+
+      <h1>
+        Policy Gate
+      </h1>
+
+      <p>
+        Visão das decisões automáticas,
+        regras executadas e bloqueios
+        aplicados aos Pull Requests.
+      </p>
+    </div>
+
+    <div class="gate-status">
+      <span class="gate-status__dot"></span>
+
+      Policy Engine ativo
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="state">
+      <mat-spinner
+        diameter="44"
+      ></mat-spinner>
+
+      <span>
+        Avaliando decisões do Policy Gate...
+      </span>
+    </div>
+  }
+
+  @else if (error()) {
+    <div class="state state--error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <strong>
+        {{ error() }}
+      </strong>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="load()"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  @else {
+    <div class="metrics">
+      <app-metric-card
+        label="Passed"
+        [value]="passed()"
+        icon="check_circle"
+        variant="success"
+      />
+
+      <app-metric-card
+        label="Blocked"
+        [value]="blocked()"
+        icon="block"
+        variant="danger"
+      />
+
+      <app-metric-card
+        label="Requires Review"
+        [value]="reviewRequired()"
+        icon="rate_review"
+        variant="warning"
+      />
+
+      <app-metric-card
+        label="Failed Checks"
+        [value]="failedChecks()"
+        icon="gpp_bad"
+        variant="danger"
+      />
+    </div>
+
+    <div class="policy-grid">
+      <article class="panel decision-panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Decision Overview
+            </span>
+
+            <h2>
+              Resultado das políticas
+            </h2>
+          </div>
+
+          <mat-icon>
+            policy
+          </mat-icon>
+        </div>
+
+        <div class="pass-rate">
+          <strong>
+            {{ passRate() }}%
+          </strong>
+
+          <span>
+            aprovação automática
+          </span>
+        </div>
+
+        <div class="decision-bars">
+          <div class="decision-bar">
+            <div>
+              <span>
+                Passed
+              </span>
+
+              <strong class="success">
+                {{ passed() }}
+              </strong>
+            </div>
+
+            <div class="bar">
+              <div
+                class="bar__value bar__value--passed"
+                [style.width.%]="
+                  total()
+                    ? (passed() / total()) * 100
+                    : 0
+                "
+              ></div>
+            </div>
+          </div>
+
+          <div class="decision-bar">
+            <div>
+              <span>
+                Blocked
+              </span>
+
+              <strong class="danger">
+                {{ blocked() }}
+              </strong>
+            </div>
+
+            <div class="bar">
+              <div
+                class="bar__value bar__value--blocked"
+                [style.width.%]="
+                  total()
+                    ? (blocked() / total()) * 100
+                    : 0
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel execution-panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Rule Execution
+            </span>
+
+            <h2>
+              Execuções
+            </h2>
+          </div>
+
+          <mat-icon>
+            rule
+          </mat-icon>
+        </div>
+
+        <div class="execution-number">
+          {{ totalChecks() }}
+        </div>
+
+        <p>
+          checks executados pelo motor
+          de políticas.
+        </p>
+
+        <div class="execution-stats">
+          <div>
+            <span>
+              PRs
+            </span>
+
+            <strong>
+              {{ total() }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Failed
+            </span>
+
+            <strong class="danger">
+              {{ failedChecks() }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Rules
+            </span>
+
+            <strong>
+              {{ rules().length }}
+            </strong>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <article class="panel">
+      <div class="panel__header">
+        <div>
+          <span class="panel__eyebrow">
+            Policy Rules
+          </span>
+
+          <h2>
+            Resultado por regra
+          </h2>
+        </div>
+
+        <span class="counter">
+          {{ rules().length }}
+          regras
+        </span>
+      </div>
+
+      <div class="rules">
+        @for (
+          rule of rules();
+          track rule.name
+        ) {
+          <div class="rule">
+            <div class="rule__identity">
+              <div
+                class="rule__icon"
+                [class.rule__icon--danger]="
+                  rule.failed > 0
+                "
+              >
+                <mat-icon>
+                  {{
+                    rule.failed > 0
+                      ? 'gpp_bad'
+                      : 'verified_user'
+                  }}
+                </mat-icon>
+              </div>
+
+              <div>
+                <strong>
+                  {{
+                    humanizeRule(
+                      rule.name
+                    )
+                  }}
+                </strong>
+
+                <span>
+                  {{ rule.total }}
+                  execução(ões)
+                </span>
+              </div>
+            </div>
+
+            <div class="rule__result">
+              <div>
+                <span>
+                  Passed
+                </span>
+
+                <strong class="success">
+                  {{ rule.passed }}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Failed
+                </span>
+
+                <strong
+                  [class.danger]="
+                    rule.failed > 0
+                  "
+                >
+                  {{ rule.failed }}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Critical
+                </span>
+
+                <strong
+                  [class.danger]="
+                    rule.critical > 0
+                  "
+                >
+                  {{ rule.critical }}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Warnings
+                </span>
+
+                <strong
+                  [class.warning]="
+                    rule.warnings > 0
+                  "
+                >
+                  {{ rule.warnings }}
+                </strong>
+              </div>
+            </div>
+          </div>
+        }
+
+        @empty {
+          <div class="empty">
+            Nenhuma regra encontrada.
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel__header">
+        <div>
+          <span class="panel__eyebrow">
+            Manual Attention
+          </span>
+
+          <h2>
+            Fila de revisão
+          </h2>
+        </div>
+
+        <span class="counter">
+          {{ attentionQueue().length }}
+          PR(s)
+        </span>
+      </div>
+
+      <div class="queue">
+        @for (
+          pr of attentionQueue();
+          track pr.id
+        ) {
+          <a
+            class="queue-row"
+            [routerLink]="[
+              '/pull-requests',
+              pr.pr_number
+            ]"
+            [queryParams]="{
+              repository:
+                pr.repository_full_name
+            }"
+          >
+            <div class="queue-row__main">
+              <strong>
+                #{{ pr.pr_number }}
+              </strong>
+
+              <div>
+                <span>
+                  {{
+                    pr.title
+                      || 'Sem título'
+                  }}
+                </span>
+
+                <small>
+                  {{
+                    pr.repository_full_name
+                  }}
+                </small>
+              </div>
+            </div>
+
+            <app-risk-badge
+              [level]="pr.risk_level"
+            />
+
+            <div class="queue-row__score">
+              <span>
+                Score
+              </span>
+
+              <strong>
+                {{
+                  pr.risk_score
+                    ?? '-'
+                }}
+              </strong>
+            </div>
+
+            <app-policy-badge
+              [status]="pr.policy_status"
+            />
+
+            <mat-icon>
+              arrow_forward
+            </mat-icon>
+          </a>
+        }
+
+        @empty {
+          <div class="safe-state">
+            <mat-icon>
+              verified_user
+            </mat-icon>
+
+            Nenhum Pull Request aguardando
+            revisão manual.
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel__header">
+        <div>
+          <span class="panel__eyebrow">
+            Decision Log
+          </span>
+
+          <h2>
+            Últimas decisões
+          </h2>
+        </div>
+      </div>
+
+      <div class="decisions">
+        @for (
+          pr of pullRequests();
+          track pr.id
+        ) {
+          <div class="decision">
+            <div class="decision__main">
+              <strong>
+                PR #{{ pr.pr_number }}
+              </strong>
+
+              <span>
+                {{ pr.repository_full_name }}
+              </span>
+            </div>
+
+            <app-policy-badge
+              [status]="pr.policy_status"
+            />
+
+            <p>
+              {{
+                pr.policy_reason
+                  || 'Sem justificativa registrada.'
+              }}
+            </p>
+
+            <a
+              mat-icon-button
+              [routerLink]="[
+                '/pull-requests',
+                pr.pr_number
+              ]"
+              [queryParams]="{
+                repository:
+                  pr.repository_full_name
+              }"
+            >
+              <mat-icon>
+                arrow_forward
+              </mat-icon>
+            </a>
+          </div>
+        }
+      </div>
+    </article>
+
+    <footer class="policy-footer">
+      <div>
+        <span></span>
+
+        Policy Gate conectado ao pipeline
+        DevFlow
+      </div>
+
+      <a
+        mat-stroked-button
+        routerLink="/pull-requests"
+      >
+        Pull Requests
+
+        <mat-icon>
+          arrow_forward
+        </mat-icon>
+      </a>
+    </footer>
+  }
+</section>

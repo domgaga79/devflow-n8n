@@ -1,0 +1,17 @@
+{
+  "action": "opened",
+  "issue": {
+    "number": 42,
+    "title": "Login retorna erro 500 ao autenticar usuário",
+    "body": "Ao tentar fazer login, a API retorna status 500.",
+    "html_url": "https://github.com/example/devflow/issues/42",
+    "labels": []
+  },
+  "repository": {
+    "full_name": "example/devflow",
+    "name": "devflow"
+  },
+  "sender": {
+    "login": "octocat"
+  }
+}

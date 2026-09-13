@@ -1,0 +1,77 @@
+{
+  "name": "DevFlow - GitHub Issue Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "github/issues",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "26cb8255-35c0-4e80-bbb4-4f445b82fd04",
+      "name": "GitHub Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-560, 0],
+      "webhookId": "devflow-github-issues"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.body ?? $json;\nconst headers = $json.headers ?? {};\n\nconst title = payload.issue?.title ?? '';\nconst body = payload.issue?.body ?? '';\nconst text = `${title} ${body}`.toLowerCase();\n\nlet classification = 'other';\nif (/bug|erro|error|falha|500|quebra|crash|defeito/.test(text)) classification = 'bug';\nelse if (/feature|melhoria|adicionar|novo recurso|enhancement/.test(text)) classification = 'feature';\nelse if (/doc|documenta|readme|manual/.test(text)) classification = 'documentation';\nelse if (/security|seguran|vulnerab|cve|xss|sql injection/.test(text)) classification = 'security';\n\nlet priority = 'normal';\nif (/security|seguran|vulnerab|cve|produção|production|crítico|critical|urgente/.test(text)) priority = 'high';\n\nreturn [{\n  json: {\n    accepted: true,\n    eventType: headers['x-github-event'] ?? 'issues',\n    deliveryId: headers['x-github-delivery'] ?? null,\n    action: payload.action ?? null,\n    repository: payload.repository?.full_name ?? null,\n    sender: payload.sender?.login ?? null,\n    issue: {\n      number: payload.issue?.number ?? null,\n      title,\n      url: payload.issue?.html_url ?? null\n    },\n    classification,\n    priority,\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "433951a4-d701-4ee7-92c3-984855c50979",
+      "name": "Normalize & Classify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-300, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "39aa302e-2bc9-4220-a07d-282e052204a5",
+      "name": "200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [-40, 0]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "GitHub Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize & Classify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize & Classify": {
+      "main": [
+        [
+          {
+            "node": "200 OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "728dd492-ce35-414c-afaf-24cb79b5a061",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

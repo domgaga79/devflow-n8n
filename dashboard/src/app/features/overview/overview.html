@@ -1,0 +1,261 @@
+<section class="overview">
+  <header class="overview__header">
+    <div>
+      <span class="eyebrow">
+        Engineering Intelligence
+      </span>
+
+      <h1>
+        DevFlow Overview
+      </h1>
+
+      <p>
+        Monitoramento de Pull Requests,
+        análise de risco e Policy Gate em tempo real.
+      </p>
+    </div>
+
+    <div class="status">
+      <span class="status__dot"></span>
+      API conectada
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="state">
+      <mat-spinner diameter="42"></mat-spinner>
+
+      <span>
+        Carregando dados do DevFlow...
+      </span>
+    </div>
+  }
+
+  @else if (error()) {
+    <div class="state state--error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <strong>
+        {{ error() }}
+      </strong>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="load()"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  @else if (summary(); as data) {
+    <div class="metrics">
+      <app-metric-card
+        label="Pull Requests"
+        [value]="data.pullRequests.total"
+        icon="merge"
+      />
+
+      <app-metric-card
+        label="High Risk"
+        [value]="data.risk.high"
+        icon="warning"
+        variant="danger"
+      />
+
+      <app-metric-card
+        label="Blocked"
+        [value]="data.policy.blocked"
+        icon="block"
+        variant="danger"
+      />
+
+      <app-metric-card
+        label="Requires Review"
+        [value]="data.pullRequests.requiresReview"
+        icon="rate_review"
+        variant="warning"
+      />
+    </div>
+
+    <div class="overview-grid">
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Risk Intelligence
+            </span>
+
+            <h2>
+              Distribuição de risco
+            </h2>
+          </div>
+
+          <mat-icon>
+            monitoring
+          </mat-icon>
+        </div>
+
+        <div class="risk-list">
+          <div class="risk-item">
+            <div class="risk-item__label">
+              <span class="dot dot--low"></span>
+              Low
+            </div>
+
+            <strong>
+              {{ data.risk.low }}
+            </strong>
+          </div>
+
+          <div class="risk-item">
+            <div class="risk-item__label">
+              <span class="dot dot--medium"></span>
+              Medium
+            </div>
+
+            <strong>
+              {{ data.risk.medium }}
+            </strong>
+          </div>
+
+          <div class="risk-item">
+            <div class="risk-item__label">
+              <span class="dot dot--high"></span>
+              High
+            </div>
+
+            <strong>
+              {{ data.risk.high }}
+            </strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Policy Gate
+            </span>
+
+            <h2>
+              Decisões automáticas
+            </h2>
+          </div>
+
+          <mat-icon>
+            policy
+          </mat-icon>
+        </div>
+
+        <div class="policy-grid">
+          <div>
+            <span>
+              Passed
+            </span>
+
+            <strong class="success">
+              {{ data.policy.passed }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Review
+            </span>
+
+            <strong class="warning">
+              {{ data.policy.reviewRequired }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Blocked
+            </span>
+
+            <strong class="danger">
+              {{ data.policy.blocked }}
+            </strong>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <article class="panel analyses">
+      <div class="panel__header">
+        <div>
+          <span class="panel__eyebrow">
+            Latest Activity
+          </span>
+
+          <h2>
+            Análises recentes
+          </h2>
+        </div>
+
+        <span class="analyses__count">
+          {{ data.events.analyses }}
+          análises
+        </span>
+      </div>
+
+      <div class="analyses__list">
+        @for (
+          analysis of data.latestAnalyses;
+          track analysis.id
+        ) {
+          <div class="analysis-row">
+            <div class="analysis-row__main">
+              <strong>
+                PR #{{ analysis.pr_number }}
+              </strong>
+
+              <span>
+                {{ analysis.repository_full_name }}
+              </span>
+            </div>
+
+            <div
+              class="badge"
+              [class.badge--high]="analysis.risk_level === 'high'"
+              [class.badge--medium]="analysis.risk_level === 'medium'"
+              [class.badge--low]="analysis.risk_level === 'low'"
+            >
+              {{ analysis.risk_level || 'unknown' }}
+            </div>
+
+            <div class="analysis-row__policy">
+              {{ analysis.policy_status || 'n/a' }}
+            </div>
+
+            <time>
+              {{
+                analysis.evaluated_at
+                  | date:'dd/MM/yyyy HH:mm'
+              }}
+            </time>
+          </div>
+        }
+
+        @empty {
+          <div class="empty">
+            Nenhuma análise encontrada.
+          </div>
+        }
+      </div>
+    </article>
+
+    <footer class="overview__footer">
+      Atualizado em
+      {{
+        data.generatedAt
+          | date:'dd/MM/yyyy HH:mm:ss'
+      }}
+    </footer>
+  }
+</section>

@@ -1,0 +1,140 @@
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding:
+    22px 24px 0;
+
+  span {
+    color: #22d3ee;
+
+    font-size: 0.68rem;
+    font-weight: 800;
+
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 5px 0 0;
+
+    color: #f8fafc;
+  }
+}
+
+mat-dialog-content {
+  min-width:
+    min(820px, 78vw);
+
+  max-height: 70vh;
+}
+
+.metadata {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-bottom: 20px;
+
+  > div {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    padding: 12px 14px;
+
+    border-radius: 11px;
+
+    background:
+      rgba(30, 41, 59, 0.65);
+  }
+
+  span {
+    color: #64748b;
+
+    font-size: 0.62rem;
+    font-weight: 800;
+
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  strong,
+  code {
+    overflow-wrap: anywhere;
+
+    color: #cbd5e1;
+  }
+}
+
+.payload-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 10px;
+
+  > span {
+    color: #94a3b8;
+
+    font-size: 0.72rem;
+    font-weight: 800;
+
+    text-transform: uppercase;
+  }
+}
+
+.payload {
+  max-height: 420px;
+
+  margin: 0;
+
+  padding: 18px;
+
+  overflow: auto;
+
+  border:
+    1px solid
+    rgba(148, 163, 184, 0.1);
+
+  border-radius: 14px;
+
+  background: #020617;
+
+  color: #a5f3fc;
+
+  font-family:
+    "Cascadia Code",
+    Consolas,
+    monospace;
+
+  font-size: 0.76rem;
+  line-height: 1.6;
+
+  white-space: pre;
+}
+
+@media (max-width: 700px) {
+  mat-dialog-content {
+    min-width: 0;
+  }
+
+  .metadata {
+    grid-template-columns: 1fr;
+  }
+
+  .payload-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

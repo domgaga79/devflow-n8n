@@ -1,0 +1,434 @@
+<section class="risk-analysis">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">
+        Engineering Risk Intelligence
+      </span>
+
+      <h1>
+        Risk Analysis
+      </h1>
+
+      <p>
+        Visão consolidada do risco técnico
+        dos Pull Requests analisados pelo DevFlow.
+      </p>
+    </div>
+
+    <div class="analysis-status">
+      <span class="analysis-status__dot"></span>
+
+      {{ total() }}
+      PR(s) analisados
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="state">
+      <mat-spinner
+        diameter="44"
+      ></mat-spinner>
+
+      <span>
+        Consolidando análise de risco...
+      </span>
+    </div>
+  }
+
+  @else if (error()) {
+    <div class="state state--error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <strong>
+        {{ error() }}
+      </strong>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="load()"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  @else {
+    <div class="metrics">
+      <app-metric-card
+        label="High Risk"
+        [value]="highRisk()"
+        icon="warning"
+        variant="danger"
+      />
+
+      <app-metric-card
+        label="Average Score"
+        [value]="averageScore()"
+        icon="analytics"
+        variant="warning"
+      />
+
+      <app-metric-card
+        label="Breaking Changes"
+        [value]="breakingChanges()"
+        icon="change_circle"
+        variant="danger"
+      />
+
+      <app-metric-card
+        label="Sensitive Files"
+        [value]="sensitiveFilesCount()"
+        icon="security"
+        variant="warning"
+      />
+    </div>
+
+    <div class="analysis-grid">
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Distribution
+            </span>
+
+            <h2>
+              Distribuição de risco
+            </h2>
+          </div>
+
+          <mat-icon>
+            bar_chart
+          </mat-icon>
+        </div>
+
+        <div class="distribution">
+          @for (
+            item of distribution();
+            track item.level
+          ) {
+            <div class="distribution__item">
+              <div class="distribution__header">
+                <div>
+                  <span
+                    class="risk-dot"
+                    [class.risk-dot--low]="
+                      item.level === 'low'
+                    "
+                    [class.risk-dot--medium]="
+                      item.level === 'medium'
+                    "
+                    [class.risk-dot--high]="
+                      item.level === 'high'
+                    "
+                  ></span>
+
+                  {{ item.label }}
+                </div>
+
+                <div>
+                  <strong>
+                    {{ item.count }}
+                  </strong>
+
+                  <span>
+                    {{ item.percentage }}%
+                  </span>
+                </div>
+              </div>
+
+              <div class="progress">
+                <div
+                  class="progress__value"
+                  [class.progress__value--low]="
+                    item.level === 'low'
+                  "
+                  [class.progress__value--medium]="
+                    item.level === 'medium'
+                  "
+                  [class.progress__value--high]="
+                    item.level === 'high'
+                  "
+                  [style.width.%]="
+                    item.percentage
+                  "
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="panel attention-panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Review Pressure
+            </span>
+
+            <h2>
+              Atenção necessária
+            </h2>
+          </div>
+
+          <mat-icon>
+            rate_review
+          </mat-icon>
+        </div>
+
+        <div class="attention">
+          <div class="attention__number">
+            {{ attentionPercentage() }}%
+          </div>
+
+          <p>
+            dos Pull Requests analisados
+            exigem revisão manual.
+          </p>
+
+          <div class="attention__stats">
+            <div>
+              <span>
+                Requires Review
+              </span>
+
+              <strong class="warning">
+                {{ requiresReview() }}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Blocked
+              </span>
+
+              <strong class="danger">
+                {{ blocked() }}
+              </strong>
+            </div>
+
+            <div>
+              <span>
+                Breaking
+              </span>
+
+              <strong class="danger">
+                {{ breakingChanges() }}
+              </strong>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <article class="panel">
+      <div class="panel__header">
+        <div>
+          <span class="panel__eyebrow">
+            Attention Queue
+          </span>
+
+          <h2>
+            Pull Requests por criticidade
+          </h2>
+        </div>
+
+        <span class="counter">
+          Top
+          {{ topRiskPullRequests().length }}
+        </span>
+      </div>
+
+      <div class="risk-table">
+        @for (
+          pr of topRiskPullRequests();
+          track pr.id
+        ) {
+          <a
+            class="risk-row"
+            [routerLink]="[
+              '/pull-requests',
+              pr.pr_number
+            ]"
+            [queryParams]="{
+              repository:
+                pr.repository_full_name
+            }"
+          >
+            <div class="risk-row__identity">
+              <strong>
+                #{{ pr.pr_number }}
+              </strong>
+
+              <div>
+                <span>
+                  {{
+                    pr.title
+                      || 'Sem título'
+                  }}
+                </span>
+
+                <small>
+                  {{
+                    pr.repository_full_name
+                  }}
+                </small>
+              </div>
+            </div>
+
+            <app-risk-badge
+              [level]="pr.risk_level"
+            />
+
+            <div class="risk-row__score">
+              <span>
+                Score
+              </span>
+
+              <strong
+                [class.danger]="
+                  pr.risk_level === 'high'
+                "
+              >
+                {{ pr.risk_score ?? '-' }}
+              </strong>
+            </div>
+
+            <app-policy-badge
+              [status]="pr.policy_status"
+            />
+
+            <mat-icon class="risk-row__arrow">
+              arrow_forward
+            </mat-icon>
+          </a>
+        }
+
+        @empty {
+          <div class="empty-inline">
+            Nenhum Pull Request analisado.
+          </div>
+        }
+      </div>
+    </article>
+
+    <div class="analysis-grid">
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Impact Surface
+            </span>
+
+            <h2>
+              Áreas impactadas
+            </h2>
+          </div>
+
+          <mat-icon>
+            hub
+          </mat-icon>
+        </div>
+
+        <div class="ranked-list">
+          @for (
+            item of impactAreas();
+            track item.name;
+            let index = $index
+          ) {
+            <div class="ranked-item">
+              <span class="ranked-item__rank">
+                {{ index + 1 }}
+              </span>
+
+              <div class="ranked-item__name">
+                {{ item.name }}
+              </div>
+
+              <strong>
+                {{ item.count }}
+              </strong>
+            </div>
+          }
+
+          @empty {
+            <div class="empty-inline">
+              Nenhuma área de impacto identificada.
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Sensitive Surface
+            </span>
+
+            <h2>
+              Arquivos sensíveis
+            </h2>
+          </div>
+
+          <mat-icon>
+            shield
+          </mat-icon>
+        </div>
+
+        <div class="sensitive-list">
+          @for (
+            item of sensitiveFiles();
+            track item.name
+          ) {
+            <div class="sensitive-item">
+              <mat-icon>
+                warning
+              </mat-icon>
+
+              <code>
+                {{ item.name }}
+              </code>
+
+              <span>
+                {{ item.count }}×
+              </span>
+            </div>
+          }
+
+          @empty {
+            <div class="safe-state">
+              <mat-icon>
+                verified_user
+              </mat-icon>
+
+              Nenhum arquivo sensível encontrado.
+            </div>
+          }
+        </div>
+      </article>
+    </div>
+
+    <footer class="risk-footer">
+      <div>
+        <span class="risk-footer__dot"></span>
+
+        Dados consolidados diretamente
+        da API DevFlow
+      </div>
+
+      <a
+        mat-stroked-button
+        routerLink="/pull-requests"
+      >
+        Ver Pull Requests
+
+        <mat-icon>
+          arrow_forward
+        </mat-icon>
+      </a>
+    </footer>
+  }
+</section>

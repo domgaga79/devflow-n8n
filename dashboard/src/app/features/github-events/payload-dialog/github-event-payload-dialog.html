@@ -1,0 +1,95 @@
+<header class="dialog-header">
+  <div>
+    <span>
+      Raw GitHub Event
+    </span>
+
+    <h2 mat-dialog-title>
+      Event #{{ data.event.id }}
+    </h2>
+  </div>
+
+  <button
+    mat-icon-button
+    mat-dialog-close
+    aria-label="Fechar"
+  >
+    <mat-icon>
+      close
+    </mat-icon>
+  </button>
+</header>
+
+<mat-dialog-content>
+  <div class="metadata">
+    <div>
+      <span>Event</span>
+
+      <strong>
+        {{ data.event.event_type }}
+      </strong>
+    </div>
+
+    <div>
+      <span>Action</span>
+
+      <strong>
+        {{
+          data.event.action
+            || 'n/a'
+        }}
+      </strong>
+    </div>
+
+    <div>
+      <span>Repository</span>
+
+      <strong>
+        {{
+          data.event.repository_full_name
+            || 'n/a'
+        }}
+      </strong>
+    </div>
+
+    <div>
+      <span>Delivery ID</span>
+
+      <code>
+        {{
+          data.event.delivery_id
+            || 'n/a'
+        }}
+      </code>
+    </div>
+  </div>
+
+  <div class="payload-toolbar">
+    <span>
+      JSON Payload
+    </span>
+
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="copyPayload()"
+    >
+      <mat-icon>
+        content_copy
+      </mat-icon>
+
+      Copiar JSON
+    </button>
+  </div>
+
+  <pre class="payload"><code>{{ formattedPayload }}</code></pre>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-stroked-button
+    mat-dialog-close
+  >
+    Fechar
+  </button>
+</mat-dialog-actions>

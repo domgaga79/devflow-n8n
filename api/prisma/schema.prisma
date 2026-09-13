@@ -1,0 +1,116 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  runtime                = "nodejs"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "js"
+  previewFeatures        = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["devflow"]
+}
+
+model github_events {
+  id                   BigInt   @id @default(autoincrement())
+  delivery_id          String?  @unique(map: "uq_github_events_delivery_id", where: raw("(delivery_id IS NOT NULL)")) @db.VarChar(100)
+  event_type           String   @db.VarChar(100)
+  action               String?  @db.VarChar(100)
+  repository_full_name String?  @db.VarChar(255)
+  sender_login         String?  @db.VarChar(255)
+  issue_number         Int?
+  issue_title          String?
+  issue_url            String?
+  classification       String?  @db.VarChar(50)
+  priority             String?  @db.VarChar(30)
+  payload              Json
+  received_at          DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([received_at(sort: Desc)], map: "idx_github_events_received_at")
+  @@index([repository_full_name], map: "idx_github_events_repository")
+  @@schema("devflow")
+}
+
+model pr_analysis_history {
+  id                   BigInt   @id @default(autoincrement())
+  repository_full_name String   @db.VarChar(255)
+  pr_number            Int
+  delivery_id          String?  @unique(map: "uq_pr_history_delivery", where: raw("(delivery_id IS NOT NULL)")) @db.VarChar(255)
+  action               String?  @db.VarChar(50)
+  head_sha             String?  @db.VarChar(100)
+  risk_level           String?  @db.VarChar(20)
+  risk_score           Int?
+  size_classification  String?  @db.VarChar(20)
+  impact_areas         Json     @default("[]")
+  breaking_change      Boolean  @default(false)
+  sensitive_files      Json     @default("[]")
+  policy_status        String?  @db.VarChar(30)
+  policy_decision      String?  @db.VarChar(30)
+  policy_reason        String?
+  requires_review      Boolean  @default(false)
+  commits              Int?
+  changed_files        Int?
+  additions            Int?
+  deletions            Int?
+  analysis_snapshot    Json     @default("{}")
+  evaluated_at         DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([evaluated_at(sort: Desc)], map: "idx_pr_history_evaluated_at")
+  @@index([repository_full_name, pr_number], map: "idx_pr_history_repository_pr")
+  @@schema("devflow")
+}
+
+model pull_requests {
+  id                    BigInt    @id @default(autoincrement())
+  repository_full_name  String    @db.VarChar(255)
+  pr_number             Int
+  last_delivery_id      String?   @db.VarChar(255)
+  action                String?   @db.VarChar(50)
+  state                 String?   @db.VarChar(30)
+  title                 String?
+  body                  String?
+  author_login          String?   @db.VarChar(255)
+  html_url              String?
+  draft                 Boolean   @default(false)
+  merged                Boolean   @default(false)
+  head_ref              String?   @db.VarChar(255)
+  head_sha              String?   @db.VarChar(64)
+  base_ref              String?   @db.VarChar(255)
+  base_sha              String?   @db.VarChar(64)
+  commits               Int       @default(0)
+  changed_files         Int       @default(0)
+  additions             Int       @default(0)
+  deletions             Int       @default(0)
+  github_created_at     DateTime? @db.Timestamptz(6)
+  github_updated_at     DateTime? @db.Timestamptz(6)
+  github_closed_at      DateTime? @db.Timestamptz(6)
+  github_merged_at      DateTime? @db.Timestamptz(6)
+  payload               Json      @default("{}")
+  received_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime  @default(now()) @db.Timestamptz(6)
+  changed_files_detail  Json      @default("[]")
+  commit_details        Json      @default("[]")
+  technical_summary     String?
+  analysis_updated_at   DateTime? @db.Timestamptz(6)
+  risk_level            String?   @db.VarChar(20)
+  risk_score            Int?
+  size_classification   String?   @db.VarChar(20)
+  impact_areas          Json      @default("[]")
+  breaking_change       Boolean   @default(false)
+  sensitive_files       Json      @default("[]")
+  review_recommendation String?
+  policy_status         String?   @db.VarChar(30)
+  policy_decision       String?   @db.VarChar(30)
+  policy_reason         String?
+  requires_review       Boolean   @default(false)
+  policy_checks         Json      @default("[]")
+  policy_evaluated_at   DateTime? @db.Timestamptz(6)
+
+  @@unique([repository_full_name, pr_number], map: "uq_pull_request")
+  @@index([repository_full_name], map: "idx_pull_requests_repository")
+  @@index([state], map: "idx_pull_requests_state")
+  @@index([updated_at(sort: Desc)], map: "idx_pull_requests_updated")
+  @@schema("devflow")
+}

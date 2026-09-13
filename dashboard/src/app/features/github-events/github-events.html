@@ -1,0 +1,590 @@
+<section class="github-events">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">
+        Webhook Observability
+      </span>
+
+      <h1>
+        GitHub Events
+      </h1>
+
+      <p>
+        Eventos recebidos pelo pipeline,
+        classificações automáticas e payloads
+        enviados pelo GitHub.
+      </p>
+    </div>
+
+    <div class="webhook-status">
+      <span></span>
+
+      Webhook stream ativo
+    </div>
+  </header>
+
+  @if (response(); as result) {
+    <div class="metrics">
+      <app-metric-card
+        label="Total Events"
+        [value]="result.meta.total"
+        icon="webhook"
+      />
+
+      <app-metric-card
+        label="Current Page"
+        [value]="result.data.length"
+        icon="view_list"
+      />
+
+      <app-metric-card
+        label="Classified"
+        [value]="classifiedOnPage()"
+        icon="label"
+        variant="success"
+      />
+
+      <app-metric-card
+        label="Prioritized"
+        [value]="prioritizedOnPage()"
+        icon="priority_high"
+        variant="warning"
+      />
+    </div>
+  }
+
+  <form
+    class="filters"
+    [formGroup]="filterForm"
+    (ngSubmit)="applyFilters()"
+  >
+    <mat-form-field
+      appearance="outline"
+      class="filters__repository"
+    >
+      <mat-label>
+        Repository
+      </mat-label>
+
+      <input
+        matInput
+        formControlName="repository"
+        placeholder="owner/repository"
+      />
+
+      <mat-icon matPrefix>
+        source
+      </mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>
+        Event Type
+      </mat-label>
+
+      <input
+        matInput
+        formControlName="eventType"
+        placeholder="issues"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>
+        Action
+      </mat-label>
+
+      <input
+        matInput
+        formControlName="action"
+        placeholder="opened"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>
+        Classification
+      </mat-label>
+
+      <input
+        matInput
+        formControlName="classification"
+        placeholder="security"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>
+        Priority
+      </mat-label>
+
+      <input
+        matInput
+        formControlName="priority"
+        placeholder="high"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>
+        Por página
+      </mat-label>
+
+      <mat-select
+        formControlName="limit"
+      >
+        <mat-option [value]="10">
+          10
+        </mat-option>
+
+        <mat-option [value]="20">
+          20
+        </mat-option>
+
+        <mat-option [value]="50">
+          50
+        </mat-option>
+
+        <mat-option [value]="100">
+          100
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="filters__actions">
+      <button
+        mat-flat-button
+        type="submit"
+      >
+        <mat-icon>
+          filter_alt
+        </mat-icon>
+
+        Filtrar
+      </button>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="clearFilters()"
+      >
+        Limpar
+      </button>
+    </div>
+  </form>
+
+  @if (loading()) {
+    <div class="state">
+      <mat-spinner
+        diameter="44"
+      ></mat-spinner>
+
+      <span>
+        Consultando eventos do GitHub...
+      </span>
+    </div>
+  }
+
+  @else if (error()) {
+    <div class="state state--error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <strong>
+        {{ error() }}
+      </strong>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="load()"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  @else if (response(); as result) {
+    <article class="table-panel">
+      @if (result.data.length > 0) {
+        <div class="table-wrapper">
+          <table
+            mat-table
+            [dataSource]="result.data"
+          >
+            <ng-container
+              matColumnDef="event"
+            >
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Event
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let event"
+              >
+                <div class="event-type">
+                  <div class="event-type__icon">
+                    <mat-icon>
+                      {{
+                        eventIcon(
+                          event.event_type
+                        )
+                      }}
+                    </mat-icon>
+                  </div>
+
+                  <div>
+                    <strong>
+                      {{ event.event_type }}
+                    </strong>
+
+                    <span>
+                      {{
+                        event.action
+                          || 'no action'
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container
+              matColumnDef="subject"
+            >
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Subject
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let event"
+              >
+                <div class="subject">
+                  @if (
+                    event.issue_number
+                  ) {
+                    <strong>
+                      #{{ event.issue_number }}
+
+                      {{
+                        event.issue_title
+                          || ''
+                      }}
+                    </strong>
+                  }
+
+                  @else {
+                    <strong>
+                      Event #{{ event.id }}
+                    </strong>
+                  }
+
+                  <span>
+                    Sender:
+                    {{
+                      event.sender_login
+                        || 'unknown'
+                    }}
+                  </span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container
+              matColumnDef="repository"
+            >
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Repository
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let event"
+              >
+                <span class="repository">
+                  {{
+                    event.repository_full_name
+                      || 'n/a'
+                  }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container
+              matColumnDef="classification"
+            >
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Classification
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let event"
+              >
+                @if (
+                  event.classification
+                ) {
+                  <span
+                    class="classification"
+                    [class.classification--security]="
+                      event.classification
+                        .toLowerCase()
+                        === 'security'
+                    "
+                  >
+                    {{
+                      event.classification
+                    }}
+                  </span>
+                }
+
+                @else {
+                  <span class="empty-value">
+                    —
+                  </span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container
+              matColumnDef="priority"
+            >
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Priority
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let event"
+              >
+                @if (event.priority) {
+                  <span
+                    class="priority"
+                    [class.priority--high]="
+                      event.priority
+                        .toLowerCase()
+                        === 'high'
+                    "
+                  >
+                    <span></span>
+
+                    {{ event.priority }}
+                  </span>
+                }
+
+                @else {
+                  <span class="empty-value">
+                    —
+                  </span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container
+              matColumnDef="receivedAt"
+            >
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              >
+                Received
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let event"
+              >
+                <span class="received-at">
+                  {{
+                    event.received_at
+                      | date:'dd/MM/yyyy HH:mm:ss'
+                  }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container
+              matColumnDef="actions"
+            >
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+              ></th>
+
+              <td
+                mat-cell
+                *matCellDef="let event"
+              >
+                <div class="actions">
+                  @if (event.issue_url) {
+                    <a
+                      mat-icon-button
+                      [href]="event.issue_url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Abrir no GitHub"
+                    >
+                      <mat-icon>
+                        open_in_new
+                      </mat-icon>
+                    </a>
+                  }
+
+                  <button
+                    mat-icon-button
+                    type="button"
+                    aria-label="Visualizar payload"
+                    [disabled]="
+                      payloadLoadingId()
+                      === event.id
+                    "
+                    (click)="
+                      openPayload(event)
+                    "
+                  >
+                    @if (
+                      payloadLoadingId()
+                      === event.id
+                    ) {
+                      <mat-icon>
+                        hourglass_top
+                      </mat-icon>
+                    }
+
+                    @else {
+                      <mat-icon>
+                        data_object
+                      </mat-icon>
+                    }
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="
+                displayedColumns
+              "
+            ></tr>
+
+            <tr
+              mat-row
+              *matRowDef="
+                let row;
+                columns: displayedColumns
+              "
+            ></tr>
+          </table>
+        </div>
+
+        <footer class="pagination">
+          <div>
+            Exibindo
+
+            <strong>
+              {{ result.data.length }}
+            </strong>
+
+            de
+
+            <strong>
+              {{ result.meta.total }}
+            </strong>
+
+            evento(s)
+          </div>
+
+          <div class="pagination__controls">
+            <button
+              mat-icon-button
+              type="button"
+              [disabled]="
+                !result.meta
+                  .hasPreviousPage
+              "
+              (click)="previousPage()"
+            >
+              <mat-icon>
+                chevron_left
+              </mat-icon>
+            </button>
+
+            <span>
+              Página
+
+              <strong>
+                {{ result.meta.page }}
+              </strong>
+
+              de
+
+              <strong>
+                {{
+                  result.meta.totalPages
+                  || 1
+                }}
+              </strong>
+            </span>
+
+            <button
+              mat-icon-button
+              type="button"
+              [disabled]="
+                !result.meta.hasNextPage
+              "
+              (click)="nextPage()"
+            >
+              <mat-icon>
+                chevron_right
+              </mat-icon>
+            </button>
+          </div>
+        </footer>
+      }
+
+      @else {
+        <div class="empty-state">
+          <mat-icon>
+            webhook
+          </mat-icon>
+
+          <h2>
+            Nenhum evento encontrado
+          </h2>
+
+          <p>
+            Ajuste os filtros ou aguarde
+            novos webhooks do GitHub.
+          </p>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="clearFilters()"
+          >
+            Limpar filtros
+          </button>
+        </div>
+      }
+    </article>
+  }
+</section>

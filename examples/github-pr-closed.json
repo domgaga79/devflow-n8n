@@ -1,0 +1,38 @@
+{
+  "action": "closed",
+  "number": 6,
+  "pull_request": {
+    "number": 6,
+    "state": "closed",
+    "title": "Test DevFlow Pull Request Automation",
+    "body": "Added a section for Pull Request Automation to README.",
+    "user": {
+      "login": "domgaga79"
+    },
+    "html_url": "https://github.com/domgaga79/devflow-n8n/pull/6",
+    "draft": false,
+    "merged": true,
+    "head": {
+      "ref": "feature/pr-test",
+      "sha": "4c41fbb8b17745862d98f6f7f7f67935a47e5a0e"
+    },
+    "base": {
+      "ref": "main",
+      "sha": "1bd375dc67b51a50c2f9089a391467fd75c29bf0"
+    },
+    "commits": 2,
+    "changed_files": 1,
+    "additions": 5,
+    "deletions": 0,
+    "created_at": "2026-09-11T04:32:24Z",
+    "updated_at": "2026-09-11T04:42:05Z",
+    "closed_at": "2026-09-11T04:42:05Z",
+    "merged_at": "2026-09-11T04:42:05Z"
+  },
+  "repository": {
+    "full_name": "domgaga79/devflow-n8n"
+  },
+  "sender": {
+    "login": "domgaga79"
+  }
+}

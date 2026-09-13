@@ -1,0 +1,22 @@
+<article
+  class="metric-card"
+  [class.metric-card--success]="variant() === 'success'"
+  [class.metric-card--warning]="variant() === 'warning'"
+  [class.metric-card--danger]="variant() === 'danger'"
+>
+  <div class="metric-card__content">
+    <span class="metric-card__label">
+      {{ label() }}
+    </span>
+
+    <strong class="metric-card__value">
+      {{ value() }}
+    </strong>
+  </div>
+
+  <div class="metric-card__icon">
+    <mat-icon>
+      {{ icon() }}
+    </mat-icon>
+  </div>
+</article>

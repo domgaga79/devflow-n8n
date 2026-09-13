@@ -1,0 +1,157 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand__mark">
+        <mat-icon>
+          account_tree
+        </mat-icon>
+      </div>
+
+      <div class="brand__text">
+        <strong>
+          DevFlow
+        </strong>
+
+        <span>
+          Engineering Intelligence
+        </span>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="mobile-menu-button"
+      aria-label="Abrir ou fechar menu"
+      aria-controls="mobile-navigation"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      (click)="toggleMobileMenu()"
+    >
+      <mat-icon>
+        {{
+          mobileMenuOpen()
+            ? 'close'
+            : 'menu'
+        }}
+      </mat-icon>
+    </button>
+
+    <div
+      class="sidebar__panel"
+      [class.sidebar__panel--open]="
+        mobileMenuOpen()
+      "
+    >
+      <nav
+        id="mobile-navigation"
+        class="nav"
+      >
+        <a
+          routerLink="/"
+          routerLinkActive="nav__item--active"
+          [routerLinkActiveOptions]="{
+            exact: true
+          }"
+          class="nav__item"
+          (click)="closeMobileMenu()"
+        >
+          <mat-icon>
+            dashboard
+          </mat-icon>
+
+          <span>
+            Overview
+          </span>
+        </a>
+
+        <a
+          routerLink="/pull-requests"
+          routerLinkActive="nav__item--active"
+          class="nav__item"
+          (click)="closeMobileMenu()"
+        >
+          <mat-icon>
+            merge
+          </mat-icon>
+
+          <span>
+            Pull Requests
+          </span>
+        </a>
+
+        <a
+          routerLink="/risk-analysis"
+          routerLinkActive="nav__item--active"
+          class="nav__item"
+          (click)="closeMobileMenu()"
+        >
+          <mat-icon>
+            warning
+          </mat-icon>
+
+          <span>
+            Risk Analysis
+          </span>
+        </a>
+
+        <a
+          routerLink="/policy-gate"
+          routerLinkActive="nav__item--active"
+          class="nav__item"
+          (click)="closeMobileMenu()"
+        >
+          <mat-icon>
+            policy
+          </mat-icon>
+
+          <span>
+            Policy Gate
+          </span>
+        </a>
+
+        <a
+          routerLink="/github-events"
+          routerLinkActive="nav__item--active"
+          class="nav__item"
+          (click)="closeMobileMenu()"
+        >
+          <mat-icon>
+            webhook
+          </mat-icon>
+
+          <span>
+            GitHub Events
+          </span>
+        </a>
+      </nav>
+
+      <div class="sidebar__footer">
+        <span
+          class="sidebar__status"
+        ></span>
+
+        <span>
+          Pipeline operational
+        </span>
+      </div>
+    </div>
+  </aside>
+
+  <button
+    type="button"
+    class="mobile-backdrop"
+    [class.mobile-backdrop--open]="
+      mobileMenuOpen()
+    "
+    [attr.tabindex]="
+      mobileMenuOpen()
+        ? 0
+        : -1
+    "
+    aria-label="Fechar menu"
+    (click)="closeMobileMenu()"
+  ></button>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

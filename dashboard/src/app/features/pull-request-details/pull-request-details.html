@@ -1,0 +1,698 @@
+<section class="details">
+  <div class="details__navigation">
+    <a
+      mat-stroked-button
+      routerLink="/pull-requests"
+    >
+      <mat-icon>
+        arrow_back
+      </mat-icon>
+
+      Pull Requests
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="state">
+      <mat-spinner diameter="44"></mat-spinner>
+
+      <span>
+        Analisando Pull Request...
+      </span>
+    </div>
+  }
+
+  @else if (error()) {
+    <div class="state state--error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <strong>
+        {{ error() }}
+      </strong>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="load()"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  @else if (pullRequest(); as pr) {
+    <header class="hero">
+      <div class="hero__main">
+        <span class="eyebrow">
+          Pull Request Intelligence
+        </span>
+
+        <div class="hero__number">
+          PR #{{ pr.pr_number }}
+        </div>
+
+        <h1>
+          {{ pr.title || 'Sem título' }}
+        </h1>
+
+        <div class="hero__repository">
+          <mat-icon>
+            source
+          </mat-icon>
+
+          {{ pr.repository_full_name }}
+        </div>
+
+        <div class="hero__branches">
+          <span>
+            {{ pr.head_ref || '?' }}
+          </span>
+
+          <mat-icon>
+            arrow_forward
+          </mat-icon>
+
+          <span>
+            {{ pr.base_ref || '?' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="hero__badges">
+        <app-risk-badge
+          [level]="pr.risk_level"
+        />
+
+        <app-policy-badge
+          [status]="pr.policy_status"
+        />
+
+        @if (pr.requires_review) {
+          <span class="review-badge">
+            <mat-icon>
+              rate_review
+            </mat-icon>
+
+            Review Required
+          </span>
+        }
+      </div>
+    </header>
+
+    <div class="metrics">
+      <article class="metric">
+        <span>
+          Risk Score
+        </span>
+
+        <strong
+          [class.metric__danger]="
+            pr.risk_level === 'high'
+          "
+        >
+          {{ pr.risk_score ?? '-' }}
+        </strong>
+      </article>
+
+      <article class="metric">
+        <span>
+          Commits
+        </span>
+
+        <strong>
+          {{ pr.commits }}
+        </strong>
+      </article>
+
+      <article class="metric">
+        <span>
+          Changed Files
+        </span>
+
+        <strong>
+          {{ pr.changed_files }}
+        </strong>
+      </article>
+
+      <article class="metric">
+        <span>
+          Additions
+        </span>
+
+        <strong class="metric__success">
+          +{{ pr.additions }}
+        </strong>
+      </article>
+
+      <article class="metric">
+        <span>
+          Deletions
+        </span>
+
+        <strong class="metric__danger">
+          -{{ pr.deletions }}
+        </strong>
+      </article>
+
+      <article class="metric">
+        <span>
+          Breaking Change
+        </span>
+
+        <strong
+          [class.metric__danger]="
+            pr.breaking_change
+          "
+          [class.metric__success]="
+            !pr.breaking_change
+          "
+        >
+          {{
+            pr.breaking_change
+              ? 'YES'
+              : 'NO'
+          }}
+        </strong>
+      </article>
+    </div>
+
+    <div class="main-grid">
+      <article class="panel summary-panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              AI / Automation Analysis
+            </span>
+
+            <h2>
+              Resumo técnico
+            </h2>
+          </div>
+
+          <mat-icon>
+            psychology
+          </mat-icon>
+        </div>
+
+        @if (pr.technical_summary) {
+          <pre class="technical-summary">{{ pr.technical_summary }}</pre>
+        }
+
+        @else {
+          <div class="empty-inline">
+            Nenhum resumo técnico disponível.
+          </div>
+        }
+      </article>
+
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Impact
+            </span>
+
+            <h2>
+              Áreas impactadas
+            </h2>
+          </div>
+
+          <mat-icon>
+            hub
+          </mat-icon>
+        </div>
+
+        <div class="impact-list">
+          @for (
+            area of pr.impact_areas ?? [];
+            track area
+          ) {
+            <span class="impact">
+              {{ area }}
+            </span>
+          }
+
+          @empty {
+            <span class="muted">
+              Nenhuma área identificada.
+            </span>
+          }
+        </div>
+
+        <div class="recommendation">
+          <span>
+            Recomendação
+          </span>
+
+          <p>
+            {{
+              pr.review_recommendation
+                || 'Nenhuma recomendação disponível.'
+            }}
+          </p>
+        </div>
+      </article>
+    </div>
+
+    <div class="main-grid">
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Sensitive Surface
+            </span>
+
+            <h2>
+              Arquivos sensíveis
+            </h2>
+          </div>
+
+          <mat-icon>
+            security
+          </mat-icon>
+        </div>
+
+        <div class="sensitive-files">
+          @for (
+            file of pr.sensitive_files ?? [];
+            track file
+          ) {
+            <div class="sensitive-file">
+              <mat-icon>
+                warning
+              </mat-icon>
+
+              <code>
+                {{ file }}
+              </code>
+            </div>
+          }
+
+          @empty {
+            <div class="safe-message">
+              <mat-icon>
+                verified_user
+              </mat-icon>
+
+              Nenhum arquivo sensível alterado.
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Policy Decision
+            </span>
+
+            <h2>
+              Policy Gate
+            </h2>
+          </div>
+
+          <mat-icon>
+            policy
+          </mat-icon>
+        </div>
+
+        <div class="policy-decision">
+          <app-policy-badge
+            [status]="pr.policy_status"
+          />
+
+          @if (pr.policy_decision) {
+            <span class="decision">
+              {{ pr.policy_decision }}
+            </span>
+          }
+        </div>
+
+        <p class="policy-reason">
+          {{
+            pr.policy_reason
+              || 'Nenhuma justificativa disponível.'
+          }}
+        </p>
+      </article>
+    </div>
+
+    <article class="panel">
+      <div class="panel__header">
+        <div>
+          <span class="panel__eyebrow">
+            Automated Rules
+          </span>
+
+          <h2>
+            Policy Checks
+          </h2>
+        </div>
+
+        <span class="counter">
+          {{
+            (pr.policy_checks ?? []).length
+          }}
+          checks
+        </span>
+      </div>
+
+      <div class="checks">
+        @for (
+          check of pr.policy_checks ?? [];
+          track check.check
+        ) {
+          <div
+            class="check"
+            [class]="
+              'check '
+              + severityClass(
+                check.severity
+              )
+            "
+          >
+            <mat-icon>
+              {{
+                policyCheckIcon(
+                  check.passed
+                )
+              }}
+            </mat-icon>
+
+            <div class="check__content">
+              <div class="check__header">
+                <strong>
+                  {{ check.check }}
+                </strong>
+
+                <span>
+                  {{
+                    check.severity
+                      || 'info'
+                  }}
+                </span>
+              </div>
+
+              <p>
+                {{
+                  check.message
+                    || 'Sem descrição.'
+                }}
+              </p>
+
+              @if (
+                check.files
+                && check.files.length
+              ) {
+                <div class="check__files">
+                  @for (
+                    file of check.files;
+                    track file
+                  ) {
+                    <code>
+                      {{ file }}
+                    </code>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @empty {
+          <div class="empty-inline">
+            Nenhum Policy Check disponível.
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel__header">
+        <div>
+          <span class="panel__eyebrow">
+            Risk Evolution
+          </span>
+
+          <h2>
+            Histórico de análise
+          </h2>
+        </div>
+
+        <span class="counter">
+          {{ history()?.total ?? 0 }}
+          análises
+        </span>
+      </div>
+
+      <div class="timeline">
+        @for (
+          item of historyAscending();
+          track item.id;
+          let last = $last
+        ) {
+          <div class="timeline__item">
+            <div class="timeline__rail">
+              <span
+                class="timeline__dot"
+                [class.timeline__dot--low]="
+                  item.risk_level === 'low'
+                "
+                [class.timeline__dot--medium]="
+                  item.risk_level === 'medium'
+                "
+                [class.timeline__dot--high]="
+                  item.risk_level === 'high'
+                "
+              ></span>
+
+              @if (!last) {
+                <span
+                  class="timeline__line"
+                ></span>
+              }
+            </div>
+
+            <div class="timeline__content">
+              <div class="timeline__header">
+                <app-risk-badge
+                  [level]="item.risk_level"
+                />
+
+                <span class="timeline__score">
+                  Score
+                  <strong>
+                    {{
+                      item.risk_score
+                        ?? '-'
+                    }}
+                  </strong>
+                </span>
+
+                <app-policy-badge
+                  [status]="
+                    item.policy_status
+                  "
+                />
+              </div>
+
+              <div class="timeline__meta">
+                <span>
+                  {{
+                    item.action
+                      || 'analysis'
+                  }}
+                </span>
+
+                <span>
+                  {{
+                    item.evaluated_at
+                      | date:'dd/MM/yyyy HH:mm:ss'
+                  }}
+                </span>
+              </div>
+
+              @if (item.policy_reason) {
+                <p>
+                  {{ item.policy_reason }}
+                </p>
+              }
+            </div>
+          </div>
+        }
+
+        @empty {
+          <div class="empty-inline">
+            Nenhum histórico encontrado.
+          </div>
+        }
+      </div>
+    </article>
+
+    <div class="main-grid">
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Source Changes
+            </span>
+
+            <h2>
+              Arquivos alterados
+            </h2>
+          </div>
+
+          <span class="counter">
+            {{ pr.changed_files }}
+          </span>
+        </div>
+
+        <div class="files">
+          @for (
+            file of pr.changed_files_detail ?? [];
+            track file.filename
+          ) {
+            <div class="file">
+              <div class="file__info">
+                <mat-icon>
+                  description
+                </mat-icon>
+
+                <div>
+                  <code>
+                    {{ file.filename }}
+                  </code>
+
+                  <span>
+                    {{ file.status }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="file__changes">
+                <span class="addition">
+                  +{{ file.additions }}
+                </span>
+
+                <span class="deletion">
+                  -{{ file.deletions }}
+                </span>
+              </div>
+            </div>
+          }
+
+          @empty {
+            <div class="empty-inline">
+              Detalhes dos arquivos não disponíveis.
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__eyebrow">
+              Git History
+            </span>
+
+            <h2>
+              Commits
+            </h2>
+          </div>
+
+          <span class="counter">
+            {{ pr.commits }}
+          </span>
+        </div>
+
+        <div class="commits">
+          @for (
+            commit of pr.commit_details ?? [];
+            track commit.sha
+          ) {
+            <div class="commit">
+              <div class="commit__sha">
+                <mat-icon>
+                  commit
+                </mat-icon>
+
+                <code>
+                  {{
+                    commit.shortSha
+                      || commit.sha.slice(
+                        0,
+                        12
+                      )
+                  }}
+                </code>
+              </div>
+
+              <strong>
+                {{
+                  commit.message
+                    || 'Sem mensagem'
+                }}
+              </strong>
+
+              <div class="commit__meta">
+                <span>
+                  {{
+                    commit.author
+                      || 'Unknown'
+                  }}
+                </span>
+
+                @if (commit.date) {
+                  <span>
+                    {{
+                      commit.date
+                        | date:'dd/MM/yyyy HH:mm'
+                    }}
+                  </span>
+                }
+              </div>
+            </div>
+          }
+
+          @empty {
+            <div class="empty-inline">
+              Detalhes dos commits não disponíveis.
+            </div>
+          }
+        </div>
+      </article>
+    </div>
+
+    <footer class="details__footer">
+      <div>
+        Última atualização:
+
+        <strong>
+          {{
+            pr.updated_at
+              | date:'dd/MM/yyyy HH:mm:ss'
+          }}
+        </strong>
+      </div>
+
+      @if (pr.html_url) {
+        <a
+          mat-stroked-button
+          [href]="pr.html_url"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <mat-icon>
+            open_in_new
+          </mat-icon>
+
+          Abrir no GitHub
+        </a>
+      }
+    </footer>
+  }
+</section>

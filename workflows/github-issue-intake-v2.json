@@ -1,0 +1,114 @@
+{
+  "name": "DevFlow - GitHub Issue Intake + PostgreSQL",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "github/issues",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "26cb8255-35c0-4e80-bbb4-4f445b82fd04",
+      "name": "GitHub Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -640,
+        0
+      ],
+      "webhookId": "devflow-github-issues"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.body ?? $json;\nconst headers = $json.headers ?? {};\n\nconst title = payload.issue?.title ?? '';\nconst body = payload.issue?.body ?? '';\nconst text = `${title} ${body}`.toLowerCase();\n\nlet classification = 'other';\nif (/security|seguran|vulnerab|cve|xss|sql injection/.test(text)) classification = 'security';\nelse if (/bug|erro|error|falha|500|quebra|crash|defeito/.test(text)) classification = 'bug';\nelse if (/feature|melhoria|adicionar|novo recurso|enhancement/.test(text)) classification = 'feature';\nelse if (/doc|documenta|readme|manual/.test(text)) classification = 'documentation';\n\nlet priority = 'normal';\nif (/security|seguran|vulnerab|cve|produção|production|crítico|critical|urgente/.test(text)) priority = 'high';\n\nreturn [{\n  json: {\n    deliveryId: headers['x-github-delivery'] ?? null,\n    eventType: headers['x-github-event'] ?? 'issues',\n    action: payload.action ?? null,\n    repository: payload.repository?.full_name ?? null,\n    sender: payload.sender?.login ?? null,\n    issue: {\n      number: payload.issue?.number ?? null,\n      title,\n      url: payload.issue?.html_url ?? null\n    },\n    classification,\n    priority,\n    payload\n  }\n}];"
+      },
+      "id": "433951a4-d701-4ee7-92c3-984855c50979",
+      "name": "Normalize & Classify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -380,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO devflow.github_events (\n  delivery_id,\n  event_type,\n  action,\n  repository_full_name,\n  sender_login,\n  issue_number,\n  issue_title,\n  issue_url,\n  classification,\n  priority,\n  payload\n)\nVALUES (\n  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb\n)\nON CONFLICT (delivery_id) WHERE delivery_id IS NOT NULL\nDO UPDATE SET\n  event_type = EXCLUDED.event_type,\n  action = EXCLUDED.action,\n  repository_full_name = EXCLUDED.repository_full_name,\n  sender_login = EXCLUDED.sender_login,\n  issue_number = EXCLUDED.issue_number,\n  issue_title = EXCLUDED.issue_title,\n  issue_url = EXCLUDED.issue_url,\n  classification = EXCLUDED.classification,\n  priority = EXCLUDED.priority,\n  payload = EXCLUDED.payload,\n  received_at = NOW()\nRETURNING\n  id,\n  delivery_id AS \"deliveryId\",\n  event_type AS \"eventType\",\n  action,\n  repository_full_name AS repository,\n  sender_login AS sender,\n  issue_number AS \"issueNumber\",\n  issue_title AS \"issueTitle\",\n  issue_url AS \"issueUrl\",\n  classification,\n  priority,\n  received_at AS \"receivedAt\";",
+        "options": {
+          "queryReplacement": "={{ [ $json.deliveryId, $json.eventType, $json.action, $json.repository, $json.sender, $json.issue.number, $json.issue.title, $json.issue.url, $json.classification, $json.priority, $json.payload ] }}"
+        }
+      },
+      "id": "c48da3b5-f7d8-4f83-a3d9-3b76ce631001",
+      "name": "Save GitHub Event",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -100,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { accepted: true, stored: true, event: $json } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "39aa302e-2bc9-4220-a07d-282e052204a5",
+      "name": "200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        180,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "GitHub Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize & Classify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize & Classify": {
+      "main": [
+        [
+          {
+            "node": "Save GitHub Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save GitHub Event": {
+      "main": [
+        [
+          {
+            "node": "200 OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f41f2d8d-7ff4-40b6-9fe6-5fafbac78cd2",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
