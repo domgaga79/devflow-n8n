@@ -1,0 +1,94 @@
+name: DevFlow Security
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+  schedule:
+    - cron: "0 6 * * 1"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: devflow-security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  codeql:
+    name: CodeQL - JavaScript & TypeScript
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            api/package-lock.json
+            dashboard/package-lock.json
+
+      - name: Install API dependencies
+        working-directory: api
+        run: npm ci --legacy-peer-deps --no-audit --no-fund
+
+      - name: Generate Prisma Client
+        working-directory: api
+        env:
+          DATABASE_URL: postgresql://devflow:devflow@localhost:5432/devflow?schema=devflow
+        run: npx prisma generate
+
+      - name: Build API
+        working-directory: api
+        run: npm run build
+
+      - name: Install Dashboard dependencies
+        working-directory: dashboard
+        run: npm ci --legacy-peer-deps --no-audit --no-fund
+
+      - name: Build Dashboard
+        working-directory: dashboard
+        run: npm run build
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+
+
+  dependency-review:
+    name: Dependency Review
+    if: github.event_name == 'pull_request'
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
