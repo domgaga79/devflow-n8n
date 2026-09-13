@@ -31,20 +31,15 @@ export default defineConfig({
       reporter: [
         'text',
         'html',
-        'lcov',
+        'json-summary',
       ],
 
-      include: [
-        'src/**/*.ts',
-      ],
-
-      exclude: [
-        'src/generated/**',
-        'src/main.ts',
-        '**/*.module.ts',
-        '**/*.dto.ts',
-        '**/*.spec.ts',
-      ],
+      thresholds: {
+        statements: 30,
+        branches: 25,
+        functions: 30,
+        lines: 30,
+      },
     },
   },
 });
