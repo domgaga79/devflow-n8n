@@ -28,6 +28,18 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
 
+      include: [
+        'src/**/*.service.ts',
+        'src/**/*.controller.ts',
+        'src/**/*.interceptor.ts',
+      ],
+
+      exclude: [
+        'src/**/*.spec.ts',
+        'src/**/*.module.ts',
+        'src/generated/**',
+      ],
+
       reporter: [
         'text',
         'html',
