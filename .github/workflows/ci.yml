@@ -1,0 +1,128 @@
+name: DevFlow CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: devflow-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API - Test & Build
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: api
+
+    env:
+      DATABASE_URL: postgresql://devflow:devflow@localhost:5432/devflow?schema=devflow
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps --no-audit --no-fund
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run API tests
+        run: npm test
+
+      - name: Build API
+        run: npm run build
+
+
+  dashboard:
+    name: Dashboard - Test & Build
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: dashboard
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps --no-audit --no-fund
+
+      - name: Run Angular tests
+        run: npm test -- --watch=false
+
+      - name: Build Angular dashboard
+        run: npm run build
+
+      - name: Verify production output
+        run: test -f dist/dashboard/browser/index.csr.html
+
+
+  docker:
+    name: Docker - Build Images
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 25
+
+    needs:
+      - api
+      - dashboard
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - service: api
+            context: ./api
+
+          - service: dashboard
+            context: ./dashboard
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ matrix.service }} image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: false
+          tags: devflow-${{ matrix.service }}:ci
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
