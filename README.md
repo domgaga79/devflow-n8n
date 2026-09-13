@@ -2,8 +2,6 @@
 
 > Plataforma de Engineering Intelligence para análise automatizada de Pull Requests, classificação de eventos do GitHub, avaliação de risco e aplicação de Policy Gates.
 
-> Engineering Intelligence platform for GitHub Pull Requests with n8n, NestJS, Prisma, PostgreSQL, Angular, automated risk analysis and Policy Gates.
-
 DevFlow integra **GitHub, n8n, PostgreSQL, NestJS, Prisma e Angular** em uma arquitetura orientada a eventos para transformar atividades de desenvolvimento em informações técnicas úteis para tomada de decisão.
 
 O projeto recebe webhooks do GitHub, valida a autenticidade dos eventos, analisa Pull Requests, calcula nível de risco, identifica alterações sensíveis, aplica políticas de engenharia e disponibiliza os resultados através de uma API REST e de um dashboard responsivo.
