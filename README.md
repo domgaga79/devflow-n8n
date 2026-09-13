@@ -1,5 +1,24 @@
 # DevFlow
 
+<p align="left">
+
+[![DevFlow CI](https://github.com/domgaga79/devflow-n8n/actions/workflows/ci.yml/badge.svg)](https://github.com/domgaga79/devflow-n8n/actions/workflows/ci.yml)
+
+[![DevFlow CD](https://github.com/domgaga79/devflow-n8n/actions/workflows/cd.yml/badge.svg)](https://github.com/domgaga79/devflow-n8n/actions/workflows/cd.yml)
+
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
+![NestJS](https://img.shields.io/badge/NestJS-12-E0234E?logo=nestjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-7.10-2D3748?logo=prisma&logoColor=white)
+![n8n](https://img.shields.io/badge/n8n-Automation-EA4B71?logo=n8n&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-Tested-6E9F18?logo=vitest&logoColor=white)
+
+</p>
+
+> Plataforma de Engineering Intelligence para análise automatizada de Pull Requests, classificação de eventos do GitHub, avaliação de risco e aplicação de Policy Gates.
+
 > Plataforma de Engineering Intelligence para análise automatizada de Pull Requests, classificação de eventos do GitHub, avaliação de risco e aplicação de Policy Gates.
 
 DevFlow integra **GitHub, n8n, PostgreSQL, NestJS, Prisma e Angular** em uma arquitetura orientada a eventos para transformar atividades de desenvolvimento em informações técnicas úteis para tomada de decisão.
