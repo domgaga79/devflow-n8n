@@ -1064,7 +1064,7 @@ Analysis History       ✅
 PostgreSQL             ✅
 Prisma                 ✅
 NestJS API             ✅
-Swagger                 ✅
+Swagger                ✅
 Angular Dashboard      ✅
 Responsive UI          ✅
 Vitest                 ✅
