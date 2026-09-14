@@ -15,6 +15,10 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-Tested-6E9F18?logo=vitest&logoColor=white)
 
+[![Release](https://img.shields.io/github/v/release/domgaga79/devflow-n8n?display_name=tag)](https://github.com/domgaga79/devflow-n8n/releases/latest)
+
+![Status](https://img.shields.io/badge/status-stable-brightgreen)
+
 [![DevFlow Security](https://github.com/domgaga79/devflow-n8n/actions/workflows/security.yml/badge.svg)](https://github.com/domgaga79/devflow-n8n/actions/workflows/security.yml)
 ![API Coverage](https://img.shields.io/badge/API%20Coverage-100%25-brightgreen)
 ![API Tests](https://img.shields.io/badge/API%20Tests-43%20passing-brightgreen)
