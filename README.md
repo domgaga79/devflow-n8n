@@ -15,9 +15,10 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-Tested-6E9F18?logo=vitest&logoColor=white)
 
+[![DevFlow Security](https://github.com/domgaga79/devflow-n8n/actions/workflows/security.yml/badge.svg)](https://github.com/domgaga79/devflow-n8n/actions/workflows/security.yml)
+![API Coverage](https://img.shields.io/badge/API%20Coverage-100%25-brightgreen)
+![API Tests](https://img.shields.io/badge/API%20Tests-43%20passing-brightgreen)
 </p>
-
-> Plataforma de Engineering Intelligence para análise automatizada de Pull Requests, classificação de eventos do GitHub, avaliação de risco e aplicação de Policy Gates.
 
 > Plataforma de Engineering Intelligence para análise automatizada de Pull Requests, classificação de eventos do GitHub, avaliação de risco e aplicação de Policy Gates.
 
@@ -346,12 +347,42 @@ No mobile:
 
 ## Infraestrutura
 
+O ambiente do DevFlow é totalmente containerizado e possui pipeline automatizado de integração, segurança e publicação de imagens.
+
+| Tecnologia | Uso |
+|---|---|
+| Docker | Containerização da API e Dashboard |
+| Docker Compose | Orquestração do ambiente local |
+| PostgreSQL 16 | Persistência dos dados |
+| Nginx | Servidor do frontend Angular em produção |
+| GitHub Actions | CI/CD e verificações de segurança |
+| GitHub Container Registry | Publicação das imagens Docker |
+
+### CI/CD
+
+O pipeline de CI executa automaticamente em Pull Requests e atualizações da `main`.
+
 ```text
-Docker
-Docker Compose
-PostgreSQL 16
-Nginx
-```
+Pull Request
+     │
+     ├── API
+     │   ├── npm ci
+     │   ├── Prisma generate
+     │   ├── testes + coverage
+     │   └── build NestJS
+     │
+     ├── Dashboard
+     │   ├── npm ci
+     │   ├── testes + coverage
+     │   └── build Angular
+     │
+     ├── Docker
+     │   ├── build API
+     │   └── build Dashboard
+     │
+     └── Security
+         ├── CodeQL
+         └── Dependency Review
 
 ---
 
@@ -677,6 +708,15 @@ devflow-dashboard    healthy
 ---
 
 # Testes
+
+O DevFlow utiliza **Vitest** tanto na API quanto no Dashboard.
+
+## Backend
+
+Entre na API:
+
+```bash
+cd api
 
 ## Backend
 
