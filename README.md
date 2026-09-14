@@ -3,9 +3,7 @@
 <p align="left">
 
 [![DevFlow CI](https://github.com/domgaga79/devflow-n8n/actions/workflows/ci.yml/badge.svg)](https://github.com/domgaga79/devflow-n8n/actions/workflows/ci.yml)
-
 [![DevFlow CD](https://github.com/domgaga79/devflow-n8n/actions/workflows/cd.yml/badge.svg)](https://github.com/domgaga79/devflow-n8n/actions/workflows/cd.yml)
-
 ![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
 ![NestJS](https://img.shields.io/badge/NestJS-12-E0234E?logo=nestjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
@@ -14,11 +12,8 @@
 ![n8n](https://img.shields.io/badge/n8n-Automation-EA4B71?logo=n8n&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-Tested-6E9F18?logo=vitest&logoColor=white)
-
 [![Release](https://img.shields.io/github/v/release/domgaga79/devflow-n8n?display_name=tag)](https://github.com/domgaga79/devflow-n8n/releases/latest)
-
 ![Status](https://img.shields.io/badge/status-stable-brightgreen)
-
 [![DevFlow Security](https://github.com/domgaga79/devflow-n8n/actions/workflows/security.yml/badge.svg)](https://github.com/domgaga79/devflow-n8n/actions/workflows/security.yml)
 ![API Coverage](https://img.shields.io/badge/API%20Coverage-100%25-brightgreen)
 ![API Tests](https://img.shields.io/badge/API%20Tests-43%20passing-brightgreen)
